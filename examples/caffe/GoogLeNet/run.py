@@ -35,12 +35,12 @@ labels=numpy.loadtxt(labels_file,str,delimiter='\t')
 # ***************************************************************
 # configure the NCS
 # ***************************************************************
-mvnc.SetGlobalOption(mvnc.GlobalOption.LOG_LEVEL, 2)
+mvnc.global_set_option(mvnc.GlobalOption.RW_LOG_LEVEL, 2)
 
 # ***************************************************************
 # Get a list of ALL the sticks that are plugged in
 # ***************************************************************
-devices = mvnc.EnumerateDevices()
+devices = mvnc.enumerate_devices()
 if len(devices) == 0:
 	print('No devices found')
 	quit()
@@ -53,7 +53,7 @@ device = mvnc.Device(devices[0])
 # ***************************************************************
 # Open the NCS
 # ***************************************************************
-device.OpenDevice()
+device.open()
 
 network_blob='graph'
 
@@ -61,7 +61,8 @@ network_blob='graph'
 with open(network_blob, mode='rb') as f:
 	blob = f.read()
 
-graph = device.AllocateGraph(blob)
+graph = mvnc.Graph('graph')
+fifoIn, fifoOut = graph.allocate_with_fifos(device, blob)
 
 # ***************************************************************
 # Load the image
@@ -77,12 +78,12 @@ img[:,:,2] = (img[:,:,2] - ilsvrc_mean[2])
 # ***************************************************************
 # Send the image to the NCS
 # ***************************************************************
-graph.LoadTensor(img.astype(numpy.float16), 'user object')
+graph.queue_inference_with_fifo_elem(fifoIn, fifoOut, img, 'user object')
 
 # ***************************************************************
 # Get the result from the NCS
 # ***************************************************************
-output, userobj = graph.GetResult()
+output, userobj = fifoOut.read_elem()
 
 # ***************************************************************
 # Print the results of the inference form the NCS
@@ -96,8 +97,10 @@ for i in range(0,5):
 # ***************************************************************
 # Clean up the graph and the device
 # ***************************************************************
-graph.DeallocateGraph()
-device.CloseDevice()
+fifoIn.destroy()
+fifoOut.destroy()
+graph.destroy()
+device.close()
     
 
 

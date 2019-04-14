@@ -1,17 +1,37 @@
 #! /bin/bash
 #
 # Attempt to download tar file to get firmware.
-# If download fails, restore saved firmware if the NCSDK installed version in /opt/movidius matches NCSDK version of this distribution.
+# If download fails, restores saved firmware if the NCSDK installed version in /opt/movidius matches NCSDK version of this distribution.
 # If download fails and versions mismatch, then existing firmware isn't restored.
 #
 
-# ncsdk_link is the url (set in install.sh & get_mvcmd.sh)
-ncsdk_link=https://downloadmirror.intel.com/28192/eng/NCSDK-1.12.01.01.tar.gz
-NCSDK_API_VERSION=$(basename $ncsdk_link | awk -F. '{print $1"."$2"."$3"."$4}'  | awk -F'NCSDK-' '{print $2}')
-download_filename="NCSDK-${NCSDK_API_VERSION}.tar.gz"
+# read in functions shared with installer 
+if [ -f ../../install-utilities.sh ] ; then
+    source ../../install-utilities.sh
+    # function initialize_constants() from install-utilities.sh
+    initialize_constants
+else
+    echo "Warning cannot find file install-utilities.sh.  Will exit."
+    exit 0
+fi
+
 
 mvcmd_dir=./mvnc
 mvcmd_old_dir=./mvnc.old
+
+VERSION_FILE="../../version.txt"
+if [ ! -f ${VERSION_FILE} ] ; then
+    # see if local copy of version.txt
+    if [ -f ./version.txt ] ; then
+        VERSION_FILE="./version.txt"
+    else
+        echo -e "${RED}Error cannot find version file version.txt."
+        echo -e "Error on line $LINENO.  Will exit ${NC}."
+        exit 1
+    fi
+fi
+NCSDK_API_VERSION=$(cat ${VERSION_FILE})
+download_filename="NCSDK-${NCSDK_API_VERSION}.tar.gz"
 
 
 function restore_old_fw()
@@ -64,7 +84,7 @@ if [ -f ../../${download_filename} ] ; then
     ln -s ../../${download_filename} .
 else
     # download, ncsdk_download_link set in install-utilities.sh function initialize_constants()
-    wget -q --no-cache -O ${download_filename} ${ncsdk_link}
+    wget -q --no-cache -O ${download_filename} ${ncsdk_download_link}
     if [ $? -ne 0 ]; then
         echo "Error downloading $ncsdk_download_link.  Will try to restore existing firmware"
         restore_old_fw

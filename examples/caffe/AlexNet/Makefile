@@ -82,8 +82,7 @@ compile: prototxt caffemodel
 .PHONY: check
 check: prototxt caffemodel
 	@echo "\nmaking check"
-#-${NCCHECK} -w ${CAFFEMODEL_FILENAME} -i ../../data/images/cat.jpg -s 12 -id 281 ${PROTOTXT_FILENAME} -S 255 -M ../../data/ilsvrc12/ilsvrc_2012_mean.npy
-	-${NCCHECK} -w ${CAFFEMODEL_FILENAME} -i ../../data/images/cat.jpg -s 12 -id 281 ${PROTOTXT_FILENAME} -M 110 -S 255 -metric top1
+	-${NCCHECK} -w ${CAFFEMODEL_FILENAME} -i ../../data/images/nps_electric_guitar.png -s 12 -id 546 ${PROTOTXT_FILENAME} -M 120 -S 255 -metric top1
 
 .PHONY: run
 run: compile
@@ -96,9 +95,9 @@ run_py: compile
 	./run.py
 
 .PHONY:	cpp
-cpp: cpp/run.cpp cpp/fp16.c
+cpp: cpp/run.cpp
 	@echo "\nmaking cpp"
-	g++ cpp/run.cpp cpp/fp16.c -o cpp/run_cpp -lmvnc
+	g++ cpp/run.cpp -o cpp/run_cpp -lmvnc
 
 .PHONY: run_cpp
 run_cpp: compile cpp
