@@ -370,7 +370,7 @@ function install_python_dependencies()
         exec_and_search_errors "$PIP_PREFIX pip3 install $PIP_QUIET  -r $DIR/requirements.txt"
         #NPS exec_and_search_errors "$PIP_PREFIX pip3 install $PIP_QUIET  --upgrade numpy"
         # Install packages for python 2.x, required for NCSDK python API
-        exec_and_search_errors "$PIP_PREFIX pip2 install $PIP_QUIET  Enum34>=1.1.6"
+        #exec_and_search_errors "$PIP_PREFIX pip2 install $PIP_QUIET  Enum34>=1.1.6"
 	exec_and_search_errors "$PIP_PREFIX pip2 install $PIP_QUIET  numpy==1.15"
         #NPS exec_and_search_errors "$PIP_PREFIX pip2 install $PIP_QUIET  --upgrade numpy"
 
